@@ -1,53 +1,60 @@
 const { gql, ApolloServer } = require("apollo-server");
 
-/***
- * Scalar Types
- * - int,
- * - float,
- * - String,
- * - Boolean,
- * - ID
- */
+const db = [
+  {
+    id: 1,
+    nome: "Paulo",
+    email: "paulo@email.com",
+    telefone: "11 1234 1234",
+    perfil: 1,
+  },
+  {
+    id: 2,
+    nome: "Lucas",
+    email: "lucas@email.com",
+    telefone: "34 1234 1234",
+    perfil: 2,
+  },
+];
 
-// resolver are like a functions on GraphQL
+const perfis = [
+  { id: 1, descricao: "ADMIN" },
+  { id: 2, descricao: "NORMAL" },
+];
+
+const typeDefs = gql`
+  type Usuario {
+    id: Int
+    nome: String
+    email: String
+    telefone: String
+    perfil: Perfil
+  }
+  type Perfil {
+    id: Int
+    descricao: String
+  }
+  type Query {
+    usuario(id: Int): Usuario
+    perfis: [Perfil]
+  }
+`;
 const resolvers = {
+  Usuario: {
+    perfil(usuario) {
+      return perfis.find((p) => p.id === usuario.perfil);
+    },
+  },
   Query: {
-    name() {
-      return "Eduardo";
+    usuario(obj, args) {
+      console.log(obj);
+      return db.find((db) => db.id === args.id);
     },
-    city() {
-      return "Curitiba";
-    },
-    state() {
-      return "Paraná";
-    },
-    age() {
-      return 18;
-    },
-    premium() {
-      return true;
-    },
-    id() {
-      return 1345456469;
-    },
-    preferences() {
-      return ["Woman", "Man", "Cuckold", "BigTits"];
+    perfis() {
+      return perfis;
     },
   },
 };
-
-// Here we need define types to each queries
-const typeDefs = gql`
-  type Query {
-    name: String
-    city: String
-    state: String
-    age: Int
-    premium: Boolean
-    id: ID
-    preferences: [String]
-  }
-`;
 
 const server = new ApolloServer({
   typeDefs,
